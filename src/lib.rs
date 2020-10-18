@@ -2962,9 +2962,13 @@ fn raw_window_handle<C: Context>(context: &C) -> RawWindowHandle {
     #[cfg(target_family = "windows")]
     {
         use raw_window_handle::windows::WindowsHandle;
+        type HINSTANCE = *mut core::ffi::c_void;
+        extern "system" {
+            fn GetModuleHandleW(name: *const u8) -> HINSTANCE;
+        }
         let (hwnd, hinstance) = unsafe {
             let hwnd = ffi::glfwGetWin32Window(context.window_ptr());
-            let hinstance = winapi::um::libloaderapi::GetModuleHandleW(std::ptr::null());
+            let hinstance = GetModuleHandleW(std::ptr::null());
             (hwnd, hinstance as _)
         };
         RawWindowHandle::Windows(WindowsHandle {
